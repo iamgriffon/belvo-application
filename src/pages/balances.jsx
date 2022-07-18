@@ -95,8 +95,8 @@ export default function Balances() {
   return (
     <>
       <Header pageName={'Balances Endpoint'} />
-      <button onClick={getBalanceList}>Get Balances List (Success)</button>
       {activeLink && <button onClick={retrieveBalanceInfoFail}>Get Balances List (Fail)</button>}
+      <button onClick={getBalanceList}>Get Balances List (Success)</button>
       {balanceID && <button onClick={DeleteBalance}>Delete Balance</button>}
       {balanceID ? (<p>Your current balance ID is {balanceID}</p>) : (<p>You don't have a selected balance ID, please get one from the list by clicking the button</p>)}
       {balanceList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, balanceList)}>Click to get a console.log() of the shown Data</button> : null}

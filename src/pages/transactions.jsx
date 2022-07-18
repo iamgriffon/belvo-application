@@ -106,8 +106,8 @@ export default function Transactions() {
   return (
     <>
       <Header pageName={'Transactions Endpoint'} />
-      <button onClick={getTransactionList}>Get Transaction Info (Success)</button>
       <button onClick={getTransactionInfoFail}>Get Transaction Info (Fail)</button>
+      <button onClick={getTransactionList}>Get Transaction Info (Success)</button>
       {TransactionID && (<button onClick={deleteTransaction}>Delete Transaction</button>)}
       {TransactionID ? (<p>Your current transaction ID is {TransactionID}</p>) : (<p>You don't have a selected transaction ID, please get one from the list by clicking the button</p>)}
       {TransactionList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, TransactionList)}>Click to get a console.log() of the shown Data</button> : null}

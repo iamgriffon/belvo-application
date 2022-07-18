@@ -86,8 +86,8 @@ export default function Account() {
 
       {activeLink.length >= 1 && (
         <>
-          <button onClick={getAccountInfo}>Get Account Info (Success)</button>
           <button onClick={getAccountInfoError}>Get Account Info (Fail)</button>
+          <button onClick={getAccountInfo}>Get Account Info (Success)</button>
         </>)
       }
       {accountID && (<button onClick={deleteAccount}>Delete Account</button>)}

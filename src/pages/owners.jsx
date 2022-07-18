@@ -32,40 +32,6 @@ export default function Owners() {
       });
   }
 
-  async function retrieveOwner() {
-    const data = {
-      link: activeLink
-    }
-    console.log('Initiating API call')
-    const response = await Belvo.post('retrieve_owner_info', data)
-      .then(res => {
-        console.log('API Call Successfully Finished')
-        setErrorMessage([]);
-        return res.data
-      });
-    setOwnerList(response);
-    if (response.detail[0].id){
-      const newID = response.detail[0].id
-      setOwnerID(newID);
-    }
-  }
-
-  async function getOwnerDetail() {
-    const data = {
-      ownerId: ownerID
-    }
-    console.log('Initiating API call')
-    await Belvo.post('get_owner_detail', data)
-      .then(res => {
-        setErrorMessage([]);
-        return res.data
-      }).then(data => {
-        setOwnerList([data]);
-        setOwnerID(data[0].id)
-        console.log('API Call Successfully Finished')
-      });
-  }
-
   async function getOwnerDetailFail() {
     const FailedData = {
       ownerId: 'This_Owner_ID_Will_Fail'
@@ -115,8 +81,8 @@ export default function Owners() {
   return (
     <div>
       <Header pageName={'Get Owners Info'} />
-      <button onClick={getOwnersList}>Get Owners List</button>
-      <button onClick={retrieveOwner}>Retrieve my own owner info</button>
+      <button onClick={getOwnerDetailFail}>Get Owner Details (Fail)</button>
+      <button onClick={getOwnersList}>Get Owners List (Success)</button>
       <div>
 
       </div>
@@ -124,8 +90,6 @@ export default function Owners() {
       {
         ownerID && (
           <>
-            <button onClick={getOwnerDetail}>Get Owner Details (Success)</button>
-            <button onClick={getOwnerDetailFail}>Get Owner Details (Fail)</button>
             <button onClick={deleteOwner}>Delete an Owner</button>
           </>
         )
