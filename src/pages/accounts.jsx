@@ -15,7 +15,7 @@ export default function Account() {
   const [accountID, setAccountID] = useState(null);
 
   useEffect(() => {
-    if (accountInfo.length != 0){
+    if (accountInfo.length != 0) {
       setAccountInfo(accountInfo);
     } else {
       return;
@@ -50,6 +50,7 @@ export default function Account() {
         const data = formatError(res.data.detail[0], FailedData, 'Invalid Link')
         setAccountInfo([]);
         setErrorMessage(data);
+        setAccountID(null);
       });
     console.log('API Call Successfully Finished')
   }
@@ -66,14 +67,16 @@ export default function Account() {
       });
     if (isDeleted) {
       const newArray = deleteArrayItem(accountInfo, accountID);
-      alert('successfully deleted account');
-      setAccountID(newArray[0].id);
-      setAccountInfo(newArray);
+      if (newArray.length) {
+        setAccountID(newArray[0].id);
+        setAccountInfo(newArray);
+        alert('successfully deleted account');
+      } else {
+        setAccountInfo([]);
+        setAccountID(null);
+        alert('Successfully deleted. That was the last entry. All of the entries have been deleted, please make a new API CALL')
+      }
       console.log('API Call Successfully Finished')
-    } else {
-      alert('An error has occured')
-      setAccountInfo([]);
-      setAccountID(null);
     }
   }
 

@@ -27,26 +27,6 @@ export default function Balances() {
       });
   }
 
-  async function retrieveBalanceInfo() {
-    const requestData = {
-      link: activeLink,
-      date1: '2021-12-21',
-      date2: '2022-01-17',
-    }
-    console.log('Initiating API call')
-    await Belvo.post('retrieve_balance_info', requestData)
-      .then(res => {
-        setErrorMessage([]);
-        return res.data
-      })
-      .then(data => {
-        setBalanceList(data);
-        const newID = data[0].id
-        setBalanceID(newID)
-      });
-    console.log('API Call Successfully Finished')
-  }
-
   async function retrieveBalanceInfoFail() {
     const invalidDate = {
       link: activeLink,
@@ -99,14 +79,16 @@ export default function Balances() {
       });
     if (isDeleted) {
       const newArray = deleteArrayItem(balanceList, balanceID);
-      alert('successfully deleted balance');
-      setBalanceID(newArray[0].id);
-      setBalanceList(newArray);
+      if (newArray.length) {
+        setBalanceID(newArray[0].id);
+        setBalanceList(newArray);
+        alert('successfully deleted balance');
+      } else {
+        setBalanceList([]);
+        setBalanceID(null);
+        alert('Successfully deleted. That was the last entry. All of the entries have been deleted, please make a new API CALL')
+      }
       console.log('API Call Successfully Finished')
-    } else {
-      alert('An error has occured')
-      setBalanceList([]);
-      setBalanceID(null);
     }
   }
 
@@ -114,9 +96,8 @@ export default function Balances() {
     <>
       <Header pageName={'Balances Endpoint'} />
       <button onClick={getBalanceList}>Get Balances List (Success)</button>
-      {activeLink && <button onClick={retrieveBalanceInfo}>Retrieve My own balance Info (Success)</button>}
-      {activeLink && <button onClick={retrieveBalanceInfoFail}>Retrieve My own balance Info (Fail)</button>}
-      {balanceID && <button onClick={DeleteBalance}>Delete Balance (Success)</button>}
+      {activeLink && <button onClick={retrieveBalanceInfoFail}>Get Balances List (Fail)</button>}
+      {balanceID && <button onClick={DeleteBalance}>Delete Balance</button>}
       {balanceID ? (<p>Your current balance ID is {balanceID}</p>) : (<p>You don't have a selected balance ID, please get one from the list by clicking the button</p>)}
       {balanceList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, balanceList)}>Click to get a console.log() of the shown Data</button> : null}
       {balanceList.length >= 1 && (

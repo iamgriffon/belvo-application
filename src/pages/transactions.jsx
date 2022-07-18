@@ -50,6 +50,7 @@ export default function Transactions() {
     setErrorMessage(data);
     console.log('API Call Successfully Finished')
     setTransactionList([]);
+    setTransactionID(null);
   }
 
   async function getTransactionList() {
@@ -89,15 +90,15 @@ export default function Transactions() {
       const newArray = deleteArrayItem(TransactionList, TransactionID)
       console.log('API Call Successfully Finished')
       alert('successfully deleted transaction');
-      setTransactionID(newArray[0].id);
-      if(!TransactionID){
-        setTransactionID(null)
+
+      if (newArray.length) {
+        setTransactionID(newArray[0].id);
+        setTransactionList(newArray);
+      } else {
+        setTransactionID(null);
+        setTransactionList([]);
+        alert('Successfully deleted. That was the last entry. All of the entries have been deleted, please make a new API CALL')
       }
-      setTransactionList(newArray);
-    } else {
-      alert('An error has occured')
-      setTransactionList(null);
-      setTransactionID(null);
     }
   }
 
@@ -109,7 +110,7 @@ export default function Transactions() {
       <button onClick={getTransactionInfoFail}>Get Transaction Info (Fail)</button>
       {TransactionID && (<button onClick={deleteTransaction}>Delete Transaction</button>)}
       {TransactionID ? (<p>Your current transaction ID is {TransactionID}</p>) : (<p>You don't have a selected transaction ID, please get one from the list by clicking the button</p>)}
-      {TransactionList.length >=1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, TransactionList)}>Click to get a console.log() of the shown Data</button> : null }
+      {TransactionList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, TransactionList)}>Click to get a console.log() of the shown Data</button> : null}
 
 
       {TransactionList && (

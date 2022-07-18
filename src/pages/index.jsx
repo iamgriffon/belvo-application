@@ -89,17 +89,18 @@ export default function Home() {
 	async function FailMFA() {
 		console.log('Initiating API call')
 		const failedData = {
-			institution: 'This_Field_Will_Fail',
+			link: activeLink,
+			institution: 'INVALID_INSTITUTION',
 			login: 'test_login',
 			password: 'test_password',
 			token: '1234ab',
-			link: 'INVALID_LINK',
+			session: userToken
 		}
 		await Belvo.post('patch_link_register', failedData)
 			.then(res => {
 				return res.data.detail
 			}).then(data => {
-				console.log('API Call Successfully Finished')
+				console.log('API Call Successfully Finished', data)
 				const formattedError = formatError(data, failedData, 'Invalid Data');
 				setErrorMessage(formattedError);
 			})
@@ -129,11 +130,12 @@ export default function Home() {
 		const data = {
 			link: activeLink
 		}
-			('Initiating API call')
+			console.log('Initiating API call')
 		await Belvo.post('delete_link', data)
 			.then(res => {
 				setAPICallResponse([]);
 				saveRegisteredLink('');
+				setUserLink(null);
 				console.log('API Call Successfully Finished')
 				alert('Link has been successfully deleted!');
 				return res.data;

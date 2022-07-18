@@ -3,11 +3,11 @@ import { client } from '../../services/belvoClient'
 export default function (req, res) {
   var token = '000000'
   console.log('req body', req.body);
-  var { institution, login, password, link } = req.body;
+  var { institution, login, password, link, session } = req.body;
 
   async function patchRegisterLink() {
     await client.connect().then(() =>
-      client.links.register(institution, login, password, link)
+      client.links.register(institution, login, password, link, session)
         .then(response => {
           console.log('1ST RESPONSE', response.data)
         })

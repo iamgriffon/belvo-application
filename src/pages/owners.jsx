@@ -55,7 +55,7 @@ export default function Owners() {
       .then(res => {
         setErrorMessage([]);
         return res.data
-      }).then(data =>{
+      }).then(data => {
         setOwnerList([data]);
         setOwnerID(data[0].id)
         console.log('API Call Successfully Finished')
@@ -92,13 +92,15 @@ export default function Owners() {
       setOwnerList([]);
       const newArray = deleteArrayItem(ownerList, ownerID);
       console.log('API Call Successfully Finished')
-      alert('successfully deleted owner');
-      setOwnerID(newArray[0].id);
-      setOwnerList(newArray);
-    } else {
-      alert('An error has occured')
-      setOwnerList([]);
-      setOwnerID(null);
+      if (newArray.length) {
+        alert('successfully deleted owner');
+        setOwnerID(newArray[0].id);
+        setOwnerList(newArray);
+      } else {
+        setOwnerList([]);
+        setOwnerID(null);
+        alert('Successfully deleted. That was the last entry. All of the entries have been deleted, please make a new API CALL')
+      }
     }
   }
 
@@ -122,7 +124,7 @@ export default function Owners() {
       }
       {ownerID ? (<p>Your current owner ID is {ownerID}</p>) : (<p>You don't have an Owner ID, please get one from the list by clicking the button</p>)}
 
-      {ownerList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, ownerList)}>Click to get a console.log() of the shown Data</button> : null }
+      {ownerList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, ownerList)}>Click to get a console.log() of the shown Data</button> : null}
       {
         ownerList.length >= 1 && (
           ownerList.map((account, index) => (
