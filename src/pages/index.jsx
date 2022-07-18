@@ -123,7 +123,6 @@ export default function Home() {
 		setAPICallResponse([]);
 		saveRegisteredLink('')
 		const formattedError = formatError(response.detail[0], data, '2FA Required');
-		console.log('Aoba', formattedError);
 		setErrorMessage(formattedError);
 	}
 
