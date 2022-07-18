@@ -44,6 +44,10 @@ export default function Owners() {
         return res.data
       });
     setOwnerList(response);
+    if (response.detail[0].id){
+      const newID = response.detail[0].id
+      setOwnerID(newID);
+    }
   }
 
   async function getOwnerDetail() {
@@ -101,6 +105,10 @@ export default function Owners() {
         setOwnerID(null);
         alert('Successfully deleted. That was the last entry. All of the entries have been deleted, please make a new API CALL')
       }
+    } else {
+      alert('failed to delete owner');
+      setOwnerID(null);
+      setOwnerList([]);
     }
   }
 
