@@ -1,21 +1,18 @@
 import { client } from '../../services/belvoClient'
 
 export default function (req, res) {
-
-  async function getTransactions() {
-    const { date1, date2, link } = req.body;
-    console.log(req.body);
+  async function getBalances() {
     client.connect()
       .then(() => {
-        client.transactions.retrieve(link, date1, { 'dateTo': date2 })
+        client.balances.list()
           .then(data => {
             console.log(data)
-            res.send(data)
+            res.send(data.slice(10,20))
           })
           .catch(error => {
             res.send(error)
           });
       });
   }
-  getTransactions();
+  getBalances();
 }

@@ -2,12 +2,12 @@ import { client } from '../../services/belvoClient'
 
 export default function (req, res) {
 
-  async function getOwners() {
+  async function retrieveOwner() {
     const { link } = req.body;
     console.log('Used link is: ', link)
     client.connect()
       .then(() => {
-        client.owners.retrieve('linkId')
+        client.owners.retrieve(link)
           .then(response => {
             res.send(response)
           })
@@ -16,6 +16,5 @@ export default function (req, res) {
           });
       });
   }
-  getOwners();
+  retrieveOwner();
 }
-

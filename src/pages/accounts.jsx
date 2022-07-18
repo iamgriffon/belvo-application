@@ -2,35 +2,37 @@ import { useState } from 'react';
 import { useBelvo } from "../context/belvo";
 import { Belvo } from "../services/axios";
 import { Header } from '../components/header';
+import { ErrorHandler } from '../components/errorHandler';
+import { formatError } from '../utils/formatError';
 
 export default function Account() {
 
   const { activeLink } = useBelvo();
-
-  const [accountInfo, setAccountInfo] = useState([]);
   const [errorMessage, setErrorMessage] = useState([]);
+  const [accountInfo, setAccountInfo] = useState([]);
 
   async function getAccountInfo() {
     const data = {
       link: activeLink
     };
-    const response = await Belvo.post('get_account_info', data)
+    await Belvo.post('get_account_info', data)
       .then(res => {
         console.log('Get Account Info API CALL response: ', res.data)
         setAccountInfo(res.data);
-        setErrorMessage([])
+        setErrorMessage([]);
       });
   };
 
   async function getAccountInfoError() {
-    const data = {
+    const FailedData = {
       link: 'ThisLinkWillFailLOL'
     };
-    await Belvo.post('get_account_info', data)
+    await Belvo.post('get_account_info', FailedData)
       .then(res => {
-        console.log('Get Account Info API CALL FAIL response: ', res.data.detail);
-        setErrorMessage(res.data.detail);
-        setAccountInfo([])
+        const data = formatError(res.data.detail[0], FailedData, 'Invalid Link')
+        console.log('Get Account Info API CALL FAIL response: ', data);
+        setAccountInfo([]);
+        setErrorMessage(data);
       });
   }
 
@@ -46,18 +48,15 @@ export default function Account() {
 
   return (
     <div>
-      <Header pageName={'Get Account Info'} />
+      <Header pageName={'Accounts Endpoint'} />
 
-      {activeLink.length >= 1 ? (
+      {activeLink.length >= 1 && (
         <>
-          <p>Your current link is {activeLink}</p>
           <button onClick={getAccountInfo}>Get Account Info (Success)</button>
           <button onClick={getAccountInfoError}>Get Account Info (Fail)</button>
           <button onClick={checkConsole}>Check console for full API response</button>
-        </>) :
-        (<p>You don't have a valid ID, please go back</p>)}
-
-
+        </>)
+      }
       {accountInfo.length >= 1 && (
         accountInfo.map((account, index) => (
           <div key={index}>
@@ -85,19 +84,9 @@ export default function Account() {
           </div>
         ))
       )}
-
-      {errorMessage.length >= 1 && (
-        errorMessage.map((error, index) => (
-          <div key={index}>
-            <h3>Error no. {index + 1}</h3>
-            <p>An error occured: the field <strong>{error.field}</strong> is {error.code}</p>
-            <p>Error reason: <strong>{error.message}</strong></p>
-            <p> ------------------------------------------</p>
-          </div>
-        ))
-      )}
-
-
+      {
+        errorMessage.length >= 1 && (<ErrorHandler errorMessage={errorMessage} />)
+      }
     </div>
   )
 }
