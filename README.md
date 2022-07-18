@@ -1,34 +1,42 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How to Run through the project
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+After cloning the project, please install dependencies via
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+ ```bash
+  npm install
+  # or
+  yarn
+  ```
 
-## Learn More
+  Then, open the project via
+  ```bash
+  npm run dev
+  # or
+  yarn dev
+  ```
 
-To learn more about Next.js, take a look at the following resources:
+  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+  1. Open Belvo Widget by clicking the "Open Widget "button.
+  2. Click the "Register Link(Fail)" button to make the first API call -- that will fail, of course.
+      1. Select "Solve MFA  (Success)" button to auccessfully finish the link registry process for institutions that require MFA.
+      2. Select "Reset Link Register Request (no MFA)" button to successfully finish the link registry process for institutions that doesn't require MFA.
+  4. Once the Link has been registered, the user will be able to navigate to the "Transactions/Owners/Balances/Accounts" endpoint pages.
+  5. Every endpoint page has:
+      1. Examples of Successful and Failed API Calls.
+      2. API Call Data being shown on screen.
+
+PS: The "CRUD API" buttons follow a pattern that you need to run certain API calls to unlock others.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Tried to deploy on vercel, but for some reason it didn't work, sorry! :(
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Check out their [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.

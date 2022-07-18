@@ -147,7 +147,7 @@ export default function Home() {
 			<div id="belvo"></div>
 
 			{activeLink.length >= 1 ? <button onClick={deleteLink}>Delete Link</button> : <button onClick={openBelvoWidget}>Open Widget</button>}
-			{userLink && errorMessage && errorMessage.length >= 1 && (<button onClick={() => registerLinkSuccess(userInstitution)}>Reset Link Register Request (Fail)</button>)}
+			{userLink && errorMessage && errorMessage.length >= 1 && (<button onClick={() => registerLinkSuccess(userInstitution)}>Reset Link Register Request (No MFA)</button>)}
 			{userLink && <button onClick={registerLinkFail}>Register Link (Fail)</button>}
 			{errorMessage.length >= 1 && <button onClick={() => FailMFA()}>Solve MFA (Fail)</button>}
 			{errorMessage.length >= 1 && <button onClick={() => SolveMFA(userInstitution)}>Solve MFA (Success)</button>}
