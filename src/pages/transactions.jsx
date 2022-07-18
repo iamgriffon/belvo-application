@@ -4,6 +4,8 @@ import { useBelvo } from '../context/belvo';
 import { useState } from "react";
 import { ErrorHandler } from "../components/errorHandler";
 import { formatError } from "../utils/formatError";
+import { deleteArrayItem } from "../utils/deleteItemFromArray";
+import { checkConsole } from "../utils/checkConsole";
 
 export default function Transactions() {
   const { activeLink } = useBelvo();
@@ -27,6 +29,7 @@ export default function Transactions() {
       date1: '2022-06-17',
       date2: '2012-12-21'
     }
+    console.log('Initiating API call')
     const response1 = await Belvo.post('retrieve_transactions_info', invalidDate)
       .then(res => {
         const fullResponse = formatError(res.data.detail[0], invalidDate, 'Invalid Date')[0]
@@ -45,7 +48,7 @@ export default function Transactions() {
     const data = []
     data.push(response1, response2, response3)
     setErrorMessage(data);
-    console.log('FAILED DATA', data)
+    console.log('API Call Successfully Finished')
     setTransactionList([]);
   }
 
@@ -55,26 +58,26 @@ export default function Transactions() {
       date1: '2020-12-21',
       date2: '2022-03-17',
     }
-    console.log(requestData);
+    console.log('Initiating API call')
     await Belvo.post('retrieve_transactions_info', requestData)
       .then(res => {
-        console.log('Bulk Data', res.data)
         setErrorMessage([]);
         return res.data
       })
       .then(data => {
-        console.log(data)
         setTransactionList(data);
         const newID = data[0].id
         setTransactionID(newID)
+        console.log('API Call Successfully Finished')
       });
+
   }
 
   async function deleteTransaction() {
     const data = {
       transactionId: TransactionID
     }
-
+    console.log('Initiating API call')
     const isDeleted = await Belvo.post('delete_transaction', data)
       .then(res => res.data)
       .then(data => {
@@ -83,9 +86,8 @@ export default function Transactions() {
 
     if (isDeleted) {
       setTransactionList([]);
-      const deletedItem = TransactionList.find(item => item.id = TransactionID);
-      const newArray = [...TransactionList].filter(item => item !== deletedItem);
-      console.log('newArray', newArray)
+      const newArray = deleteArrayItem(TransactionList, TransactionID)
+      console.log('API Call Successfully Finished')
       alert('successfully deleted transaction');
       setTransactionID(newArray[0].id);
       if(!TransactionID){
@@ -107,7 +109,7 @@ export default function Transactions() {
       <button onClick={getTransactionInfoFail}>Get Transaction Info (Fail)</button>
       {TransactionID && (<button onClick={deleteTransaction}>Delete Transaction</button>)}
       {TransactionID ? (<p>Your current transaction ID is {TransactionID}</p>) : (<p>You don't have a selected transaction ID, please get one from the list by clicking the button</p>)}
-      {TransactionList && <button onClick={() => console.log('Sliced Data: ', TransactionList)}>Click to get a console.log() of the shown Data</button>}
+      {TransactionList.length >=1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, TransactionList)}>Click to get a console.log() of the shown Data</button> : null }
 
 
       {TransactionList && (

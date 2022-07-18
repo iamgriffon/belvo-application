@@ -1,48 +1,79 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBelvo } from "../context/belvo";
 import { Belvo } from "../services/axios";
 import { Header } from '../components/header';
 import { ErrorHandler } from '../components/errorHandler';
 import { formatError } from '../utils/formatError';
+import { deleteArrayItem } from "../utils/deleteItemFromArray";
+import { checkConsole } from "../utils/checkConsole";
 
 export default function Account() {
 
   const { activeLink } = useBelvo();
   const [errorMessage, setErrorMessage] = useState([]);
   const [accountInfo, setAccountInfo] = useState([]);
+  const [accountID, setAccountID] = useState(null);
+
+  useEffect(() => {
+    if (accountInfo.length != 0){
+      setAccountInfo(accountInfo);
+    } else {
+      return;
+    }
+  }, [accountInfo])
 
   async function getAccountInfo() {
     const data = {
       link: activeLink
     };
+    console.log('Initiating API call')
     await Belvo.post('get_account_info', data)
       .then(res => {
-        console.log('Get Account Info API CALL response: ', res.data)
-        setAccountInfo(res.data);
         setErrorMessage([]);
+        return res.data
+      })
+      .then(data => {
+        setAccountInfo(data);
+        const newID = data[0].id
+        setAccountID(newID);
       });
+    console.log('API Call Successfully Finished')
   };
 
   async function getAccountInfoError() {
     const FailedData = {
       link: 'ThisLinkWillFailLOL'
     };
+    console.log('Initiating API Call')
     await Belvo.post('get_account_info', FailedData)
       .then(res => {
         const data = formatError(res.data.detail[0], FailedData, 'Invalid Link')
-        console.log('Get Account Info API CALL FAIL response: ', data);
         setAccountInfo([]);
         setErrorMessage(data);
       });
+    console.log('API Call Successfully Finished')
   }
 
-  function checkConsole() {
-    if (accountInfo.length == 0 && errorMessage.length == 0) {
-      alert('You need to run an operation first')
-    } else if (errorMessage.length == 0) {
-      console.log(accountInfo)
+  async function deleteAccount() {
+    const requestBody = {
+      accountId: accountID
+    };
+    console.log('Initiating API call')
+    const isDeleted = await Belvo.post('delete_account', requestBody)
+      .then(res => res.data)
+      .then(data => {
+        return data;
+      });
+    if (isDeleted) {
+      const newArray = deleteArrayItem(accountInfo, accountID);
+      alert('successfully deleted account');
+      setAccountID(newArray[0].id);
+      setAccountInfo(newArray);
+      console.log('API Call Successfully Finished')
     } else {
-      console.log(errorMessage[0])
+      alert('An error has occured')
+      setAccountInfo([]);
+      setAccountID(null);
     }
   }
 
@@ -54,23 +85,26 @@ export default function Account() {
         <>
           <button onClick={getAccountInfo}>Get Account Info (Success)</button>
           <button onClick={getAccountInfoError}>Get Account Info (Fail)</button>
-          <button onClick={checkConsole}>Check console for full API response</button>
         </>)
       }
+      {accountID && (<button onClick={deleteAccount}>Delete Account</button>)}
+      {accountID ? (<p>Your current account ID is {accountID}</p>) : (<p>You don't have a selected account ID, please get one from the list by clicking the button</p>)}
+      {accountInfo.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, accountInfo)}>Click to get a console.log() of the shown Data</button> : null}
       {accountInfo.length >= 1 && (
         accountInfo.map((account, index) => (
           <div key={index}>
             <h3>Entry no. {index + 1}</h3>
             <p>Type of Institution: <strong>{account.institution.type}</strong></p>
+            <p>Account ID: <strong>{account.id}</strong></p>
             <p>Currency: <strong>{account.currency}</strong></p>
             <p>Category: <strong>{account.category}</strong></p>
             <p>Type of Investment: <strong>{account.type}</strong></p>
             <p>Institution: <strong>{account.institution.name}</strong></p>
             <p>Current Balance: {account.balance.current}</p>
             <p>Available Balance: {account.balance.available}</p>
-            <p>Funding data: </p>
+            {account.funds_data && <p>Funding data: </p>}
 
-            {accountInfo[0].funds_data.length >= 1 && accountInfo.map((info, key) => (
+            {accountInfo[0].funds_data?.length >= 1 && accountInfo.map((info, key) => (
               info.funds_data?.map((fund, index) => (
                 <ul key={index}>
                   <li>Funding Name: {fund.name}</li>

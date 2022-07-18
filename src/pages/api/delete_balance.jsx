@@ -4,7 +4,7 @@ export default function (req, res) {
 
   async function deleteBalance() {
     const { balanceId } = req.body;
-    console.log('Used owner ID is: ', balanceId);
+    console.log('Used balance ID is: ', balanceId);
     client.connect().then(() => {
       client.balances.delete(balanceId)
         .then(data => {

@@ -4,6 +4,8 @@ import { Belvo } from "../services/axios";
 import { Header } from '../components/header';
 import { ErrorHandler } from '../components/errorHandler';
 import { formatError } from '../utils/formatError';
+import { deleteArrayItem } from '../utils/deleteItemFromArray';
+import { checkConsole } from '../utils/checkConsole';
 
 export default function Owners() {
   const { activeLink } = useBelvo();
@@ -16,14 +18,14 @@ export default function Owners() {
   }, [ownerID])
 
   async function getOwnersList() {
+    console.log('Initiating API call')
     await Belvo.get('get_owners_list')
       .then(res => {
-        console.log('Get Owners Info API FULL CALL response: ', res.data);
+        console.log('API Call Successfully Finished')
         setErrorMessage([]);
         return res.data
 
       }).then(data => {
-        console.log(data)
         setOwnerList(data);
         const newID = data[0].id
         setOwnerID(newID);
@@ -34,10 +36,10 @@ export default function Owners() {
     const data = {
       link: activeLink
     }
-    console.log(data);
+    console.log('Initiating API call')
     const response = await Belvo.post('retrieve_owner_info', data)
       .then(res => {
-        console.log('Retrieve Owners Info API CALL response: ', res.data)
+        console.log('API Call Successfully Finished')
         setErrorMessage([]);
         return res.data
       });
@@ -48,28 +50,30 @@ export default function Owners() {
     const data = {
       ownerId: ownerID
     }
-    console.log(data);
-    const response = await Belvo.post('get_owner_detail', data)
+    console.log('Initiating API call')
+    await Belvo.post('get_owner_detail', data)
       .then(res => {
-        console.log('Retrieve Owners Info API CALL response: ', res.data)
         setErrorMessage([]);
         return res.data
+      }).then(data =>{
+        setOwnerList([data]);
+        setOwnerID(data[0].id)
+        console.log('API Call Successfully Finished')
       });
-    setOwnerList([response]);
   }
 
   async function getOwnerDetailFail() {
     const FailedData = {
       ownerId: 'This_Owner_ID_Will_Fail'
     }
-    console.log(FailedData);
+    console.log('Initiating API call')
     await Belvo.post('get_owner_detail', FailedData)
       .then(res => {
         const fullResponse = formatError(res.data.detail[0], FailedData, 'Invalid OwnerID')
-        console.log('Get Account Info API CALL FAIL response: ', res.data);
+        console.log('API Call Successfully Finished')
         setErrorMessage(fullResponse);
         setOwnerID(null);
-        setownerList([]);
+        setOwnerList([]);
       });
   }
 
@@ -77,7 +81,7 @@ export default function Owners() {
     const data = {
       ownerId: ownerID
     }
-
+    console.log('Initiating API call')
     const isDeleted = await Belvo.post('delete_owner', data)
       .then(res => res.data)
       .then(data => {
@@ -86,9 +90,8 @@ export default function Owners() {
 
     if (isDeleted) {
       setOwnerList([]);
-      const deletedItem = ownerList.find(item => item.id = data.ownerId);
-      const newArray = [...ownerList].filter(item => item !== deletedItem);
-      console.log('newArray', newArray);
+      const newArray = deleteArrayItem(ownerList, ownerID);
+      console.log('API Call Successfully Finished')
       alert('successfully deleted owner');
       setOwnerID(newArray[0].id);
       setOwnerList(newArray);
@@ -119,9 +122,7 @@ export default function Owners() {
       }
       {ownerID ? (<p>Your current owner ID is {ownerID}</p>) : (<p>You don't have an Owner ID, please get one from the list by clicking the button</p>)}
 
-
-
-      {ownerList.length >= 1 && <button onClick={() => console.log('Sliced Data: ', ownerList)}>Click to get a console.log() of the shown Data</button>}
+      {ownerList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, ownerList)}>Click to get a console.log() of the shown Data</button> : null }
       {
         ownerList.length >= 1 && (
           ownerList.map((account, index) => (

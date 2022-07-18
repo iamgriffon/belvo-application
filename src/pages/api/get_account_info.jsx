@@ -4,7 +4,7 @@ export default function (req, res) {
 
   async function getAccountInfo() {
     const { link } = req.body;
-    console.log('Used Link is: ',link)
+    console.log('Used account ID is: ',link)
     client.connect().then(() => {
       client.accounts.retrieve(link)
         .then(data => {

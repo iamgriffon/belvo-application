@@ -5,6 +5,7 @@ import { useBelvo } from '../context/belvo';
 import { Belvo } from '../services/axios';
 import { ErrorHandler } from '../components/errorHandler';
 import { formatError } from '../utils/formatError';
+import { checkConsole } from '../utils/checkConsole';
 
 export default function Home() {
 	const { activeLink, saveRegisteredLink, userInstitution, saveInstitution } = useBelvo();
@@ -15,9 +16,10 @@ export default function Home() {
 
 
 	async function getAccessTokenSuccess() {
+		console.log('Acquiring Token')
 		const token = await Belvo.get('get_token_success')
 			.then(response => {
-				console.log('Access Token API CALL response: ', response.data)
+				console.log('Token Acquired ', response.data)
 				return response.data.access
 			});
 		setUserToken(token);
@@ -48,7 +50,7 @@ export default function Home() {
 			token: userToken,
 		}
 
-		console.log('Initiating API call for Registering Link')
+		console.log('Initiating API call')
 		const response = await Belvo.post('register_link_success', data)
 			.then(res => {
 				console.log('API Call finished successfully!');
@@ -58,7 +60,6 @@ export default function Home() {
 		if (response.id) {
 			setAPICallResponse([response]);
 			setErrorMessage([]);
-			console.log('IF 1', response)
 		} else if (response.detail[0].link) {
 			setAPICallResponse([]);
 			saveRegisteredLink('');
@@ -74,21 +75,19 @@ export default function Home() {
 			password: 'test_password',
 			token: '1234ab',
 		}
-
-		console.log('Initiating API call for Initiating MFA PATCH')
+			console.log('Initiating API call')
 		await Belvo.post('patch_link_register', data)
 			.then(res => {
 				setAPICallResponse([res.data]);
 				saveRegisteredLink(res.data.id);
 				return res.data;
 			})
-			.then(data => {
-				console.log('API CALL for MFA PATCH Completed: ', data);
-				setErrorMessage([]);
-			});
+		console.log('API Call Successfully Finished')
+		setErrorMessage([]);
 	}
 
 	async function FailMFA() {
+		console.log('Initiating API call')
 		const failedData = {
 			institution: 'This_Field_Will_Fail',
 			login: 'test_login',
@@ -96,14 +95,14 @@ export default function Home() {
 			token: '1234ab',
 			link: 'INVALID_LINK',
 		}
-		const response = await Belvo.post('patch_link_register', failedData)
+		await Belvo.post('patch_link_register', failedData)
 			.then(res => {
-				console.log('MFA Auth Fail API Call finished successfully!');
-				return res.data
+				return res.data.detail
+			}).then(data => {
+				console.log('API Call Successfully Finished')
+				const formattedError = formatError(data, failedData, 'Invalid Data');
+				setErrorMessage(formattedError);
 			})
-		const formattedError = formatError(response.detail, failedData, 'Invalid Data');
-		console.log(formattedError)
-		setErrorMessage(formattedError);
 	}
 
 	async function registerLinkFail() {
@@ -113,44 +112,47 @@ export default function Home() {
 			password: 'test'
 		}
 
-		console.log('Initiating API call for Registering Link')
+		console.log('Initiating API call')
 		const response = await Belvo.post('register_link_success', data)
 			.then(res => {
 				console.log('API Call finished successfully!');
 				return res.data;
 			});
-		console.log('Register Link API Call response: ', response)
 		setAPICallResponse([]);
 		saveRegisteredLink('')
-		const formattedError = formatError(response.detail[0], data, '2FA Required');
+		const formattedError = formatError(response.detail, data, '2FA Required');
 		setErrorMessage(formattedError);
+		console.log('API Call Successfully Finished')
 	}
 
 	async function deleteLink() {
 		const data = {
 			link: activeLink
 		}
-
+			('Initiating API call')
 		await Belvo.post('delete_link', data)
-			.then(res => res.data)
-			.then(data => {
-				console.log(data);
+			.then(res => {
 				setAPICallResponse([]);
 				saveRegisteredLink('');
+				console.log('API Call Successfully Finished')
 				alert('Link has been successfully deleted!');
-			});
+				return res.data;
+			})
 	}
 
 	return (
 		<div>
 			<Header pageName={'Open Widget + Register Link'} />
 			<div id="belvo"></div>
+			<div>
 
+			</div>
 			{activeLink.length >= 1 ? <button onClick={deleteLink}>Delete Link</button> : <button onClick={openBelvoWidget}>Open Widget</button>}
 			{userLink && errorMessage && errorMessage.length >= 1 && (<button onClick={() => registerLinkSuccess(userInstitution)}>Reset Link Register Request (No MFA)</button>)}
 			{userLink && <button onClick={registerLinkFail}>Register Link (Fail)</button>}
 			{errorMessage.length >= 1 && <button onClick={() => FailMFA()}>Solve MFA (Fail)</button>}
 			{errorMessage.length >= 1 && <button onClick={() => SolveMFA(userInstitution)}>Solve MFA (Success)</button>}
+			{apicallResponse.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, apicallResponse)}>Click to get a console.log() of the shown Data</button> : null}
 			{apicallResponse.length >= 1 && (
 				apicallResponse.map((api, index) => (
 					<div key={index}>

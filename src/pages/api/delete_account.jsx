@@ -2,11 +2,11 @@ import { client } from '../../services/belvoClient'
 
 export default function (req, res) {
 
-  async function deleteTransaction() {
-    const { transactionId } = req.body;
-    console.log('Used transaction ID is: ',transactionId);
+  async function deleteAccount() {
+    const { accountId } = req.body;
+    console.log('Used account ID is: ',accountId);
     client.connect().then(() => {
-      client.transactions.delete(transactionId)
+      client.accounts.delete(accountId)
         .then(data => {
           console.log(data)
           res.status(200).send(data);
@@ -15,5 +15,5 @@ export default function (req, res) {
         })
     })
   }
-  deleteTransaction();
+  deleteAccount();
 }
