@@ -35,6 +35,16 @@ After cloning the project, please install dependencies via
 
 PS: The "CRUD API" buttons follow a pattern that you need to run certain API calls to unlock others.
 
+## Regarding Database features
+
+MongoDB has been used for this project, so in order to test the application's database features, follow these steps:
+
+  1. Create a new MongoDB Database called "belvo_sandbox".
+  2. Create a new Collection in it called "links".
+  3. Create a new Index on the "links" collection called "link_by_institution" whereas the field "institution" has an UNIQUE + TEXT value
+  4. Link the Cluster/Database to the application using a .env variable called **MONGODB_URL** by following their Node.js documentation
+
+
 ## Deploy on Vercel
 
 Tried to deploy on vercel, but for some reason it didn't work, sorry! :(

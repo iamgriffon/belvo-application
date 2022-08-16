@@ -1,10 +1,11 @@
 import { client } from '../../services/belvoClient'
 
 export default function (req, res) {
-  async function getBalances() {
+  const { link  } = req.body
+  async function retrieveAccount() {
     client.connect()
       .then(() => {
-        client.balances.list({limit: 10})
+        client.accounts.retrieve(link, {limit: 10})
           .then(data => {
             res.send(data)
           })
@@ -13,5 +14,5 @@ export default function (req, res) {
           });
       });
   }
-  getBalances();
+  retrieveAccount();
 }

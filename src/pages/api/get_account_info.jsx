@@ -6,7 +6,7 @@ export default function (req, res) {
     const { link } = req.body;
     console.log('Used account ID is: ',link)
     client.connect().then(() => {
-      client.accounts.retrieve(link)
+      client.accounts.list({limit: 10})
         .then(data => {
           res.status(200).send(data)
         }).catch(error => {

@@ -30,17 +30,17 @@ export default function Transactions() {
       date2: '2012-12-21'
     }
     console.log('Initiating API call')
-    const response1 = await Belvo.post('retrieve_transactions_info', invalidDate)
+    const response1 = await Belvo.post('get_transactions_list', invalidDate)
       .then(res => {
         const fullResponse = formatError(res.data.detail[0], invalidDate, 'Invalid Date')[0]
         return fullResponse
       });
-    const response2 = await Belvo.post('retrieve_transactions_info', invalidID)
+    const response2 = await Belvo.post('get_transactions_list', invalidID)
       .then(res => {
         const fullResponse = formatError(res.data.detail[0], invalidID, 'Invalid ID')[0]
         return fullResponse
       });
-    const response3 = await Belvo.post('retrieve_transactions_info', invalidField)
+    const response3 = await Belvo.post('get_transactions_list', invalidField)
       .then(res => {
         const fullResponse = formatError(res.data.detail[0], invalidField, 'Invalid Field')[0]
         return fullResponse
@@ -51,27 +51,6 @@ export default function Transactions() {
     console.log('API Call Successfully Finished')
     setTransactionList([]);
     setTransactionID(null);
-  }
-
-  async function getTransactionList() {
-    const requestData = {
-      link: activeLink,
-      date1: '2020-12-21',
-      date2: '2022-03-17',
-    }
-    console.log('Initiating API call')
-    await Belvo.post('retrieve_transactions_info', requestData)
-      .then(res => {
-        setErrorMessage([]);
-        return res.data
-      })
-      .then(data => {
-        setTransactionList(data);
-        const newID = data[0].id
-        setTransactionID(newID)
-        console.log('API Call Successfully Finished')
-      });
-
   }
 
   async function deleteTransaction() {
@@ -102,6 +81,20 @@ export default function Transactions() {
     }
   }
 
+  async function getTransactionList() {
+    const requestData = {
+      link: activeLink,
+      date1: '2020-12-21',
+      date2: '2022-03-17',
+    }
+    await Belvo.post('get_transactions_list', requestData)
+      .then(res => res.data)
+      .then(data => {
+        console.log('API Call Successfully Finished', data)
+        setTransactionList(data);
+        if (data.length > 0 && data[0].id) setTransactionID(data[0].id);
+      })
+  }
 
   return (
     <>
@@ -118,8 +111,8 @@ export default function Transactions() {
           <div key={index}>
             <h3>Entry no. {index + 1}</h3>
             <p>Transaction Category: <strong>{data.category}</strong></p>
-            <p>Transaction Balance: <strong>{data.balance.toFixed(2)}</strong></p>
-            <p>Transaction Amount: <strong>{data.amount.toFixed(2)}</strong></p>
+            <p>Transaction Balance: <strong>{data.balance}</strong></p>
+            <p>Transaction Amount: <strong>{data.amount}</strong></p>
             <p>Transaction Currency: <strong>{data.currency}</strong></p>
             <p>Merchant Name: <strong>{data.merchant.name}</strong></p>
             <p>Account ID: <strong>{data.account.id}</strong></p>

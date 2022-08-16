@@ -8,7 +8,6 @@ import { deleteArrayItem } from '../utils/deleteItemFromArray';
 import { checkConsole } from '../utils/checkConsole';
 
 export default function Owners() {
-  const { activeLink } = useBelvo();
   const [errorMessage, setErrorMessage] = useState([]);
   const [ownerList, setOwnerList] = useState([]);
   const [ownerID, setOwnerID] = useState(null);
@@ -20,16 +19,14 @@ export default function Owners() {
   async function getOwnersList() {
     console.log('Initiating API call')
     await Belvo.get('get_owners_list')
-      .then(res => {
-        console.log('API Call Successfully Finished')
+      .then(res =>  res.data)
+      .then(data => {
+        console.log(data)
         setErrorMessage([]);
-        return res.data
-
-      }).then(data => {
         setOwnerList(data);
-        const newID = data[0].id
-        setOwnerID(newID);
+        if (data.length > 0 && data[0].id) setOwnerID(data[0].id);
       });
+      console.log('API Call Successfully Finished')
   }
 
   async function getOwnerDetailFail() {
@@ -78,11 +75,24 @@ export default function Owners() {
     }
   }
 
+  async function getOwnerDetail(){
+    const data = {
+      ownerId: ownerID
+    }
+    await Belvo.post('get_owner_detail', data)
+    .then(res => res.data)
+    .then(data => {
+      setErrorMessage([]);
+      setOwnerList([data]);
+    })
+    console.log('API Call Successfully Finished')
+  }
   return (
     <div>
       <Header pageName={'Get Owners Info'} />
       <button onClick={getOwnerDetailFail}>Get Owner Details (Fail)</button>
       <button onClick={getOwnersList}>Get Owners List (Success)</button>
+      {ownerID && <button onClick={getOwnerDetail}>Get Owner Detail</button>}
       <div>
 
       </div>
@@ -109,6 +119,7 @@ export default function Owners() {
               <p>Owner's Link: <strong>{account.link}</strong></p>
               <p>Owner's Document Type: <strong>{account.document_id.document_type}</strong></p>
               <p>Owner's Document Number: <strong>{account.document_id.document_number}</strong></p>
+              <p>Owner's Email: <strong>{account.email}</strong></p>
             </div>
           ))
         )

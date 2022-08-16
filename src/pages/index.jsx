@@ -13,6 +13,8 @@ export default function Home() {
 	const [userLink, setUserLink] = useState(null);
 	const [errorMessage, setErrorMessage] = useState([]);
 	const [apicallResponse, setAPICallResponse] = useState([]);
+	const [hasMFA, setHasMFA] = useState(null);
+	const [isinDB, setIsInDB] = useState(null);
 
 
 	async function getAccessTokenSuccess() {
@@ -26,10 +28,13 @@ export default function Home() {
 		return token;
 	}
 
-	function successCallbackFunction(link, institution) {
-		setUserLink(link);
-		saveInstitution(institution);
-		console.log('Success Callback Function Results: ', { link, institution })
+	async function successCallbackFunction(link, institution) {
+		const mongores = await Belvo.post('mongo_save_link', { link, institution });
+		const { data } = mongores;
+		setUserLink(mongores.data.link);
+		saveInstitution(mongores.data.institution);
+		console.log('Success Callback Function Results: ', { link: data.link, institution: data.institution });
+		setIsInDB(true)
 	}
 
 	function belvoWidget(accessToken) {
@@ -56,15 +61,21 @@ export default function Home() {
 				console.log('API Call finished successfully!');
 				return res.data;
 			});
+
 		saveRegisteredLink(response.id || response.detail[0].link)
 		if (response.id) {
 			setAPICallResponse([response]);
 			setErrorMessage([]);
+			setHasMFA(false);
+			await Belvo.post('mongo_update_link', response)
+				.then(res => console.log('Link has also been updated on database: ', res.data))
+				setIsInDB(false)
 		} else if (response.detail[0].link) {
 			setAPICallResponse([]);
 			saveRegisteredLink('');
 			const fullResponse = formatError(response.detail[0], data, '2FA Required')
 			setErrorMessage(fullResponse);
+			setHasMFA(true)
 		}
 	}
 
@@ -75,15 +86,22 @@ export default function Home() {
 			password: 'test_password',
 			token: '1234ab',
 		}
-			console.log('Initiating API call')
-		await Belvo.post('patch_link_register', data)
-			.then(res => {
-				setAPICallResponse([res.data]);
-				saveRegisteredLink(res.data.id);
-				return res.data;
-			})
-		console.log('API Call Successfully Finished')
-		setErrorMessage([]);
+		console.log('Initiating API call')
+		try {
+			const response = await Belvo.post('patch_link_register', data)
+				.then(res => {
+					setAPICallResponse([res.data]);
+					saveRegisteredLink(res.data.id);
+					setErrorMessage([]);
+					setIsInDB(false);
+					return res.data
+				})
+			await Belvo.post('mongo_update_link', response)
+				.then(res => console.log('Link has also been updated on database: ', res.data))
+
+		} finally {
+			console.log('API Call Successfully Finished');
+		}
 	}
 
 	async function FailMFA() {
@@ -128,18 +146,42 @@ export default function Home() {
 
 	async function deleteLink() {
 		const data = {
-			link: activeLink
+			link: activeLink,
+			institution: userInstitution
 		}
-			console.log('Initiating API call')
+		console.log('Initiating API call')
 		await Belvo.post('delete_link', data)
 			.then(res => {
-				setAPICallResponse([]);
-				saveRegisteredLink('');
-				setUserLink(null);
-				console.log('API Call Successfully Finished')
-				alert('Link has been successfully deleted!');
+				console.log('Belvo API Call Successfully Finished', res.data)
 				return res.data;
+			}).then(async() => {
+				await Belvo.post('mongo_delete_link', data)
 			})
+			setAPICallResponse([]);
+			saveRegisteredLink('');
+			setUserLink(null);
+			setErrorMessage([])
+			alert('Link has been successfully deleted!');
+	}
+
+	async function fetchLink() {
+		const data = {
+			institution: userInstitution
+		};
+		console.log('Initiating API call', data);
+
+		const fetchedData = await Belvo.post('mongo_fetch_link', data).then(res => res.data);
+
+		if (fetchedData.status === 'valid') {
+			if (confirm('An existing valid link has been found, would you like to apply it for this session?') == true) {
+				setAPICallResponse([fetchedData]);
+				saveRegisteredLink(fetchedData.id);
+				setErrorMessage([]);
+				setIsInDB(false)
+			}
+		} else alert('Not valid entries have been found in the database, please try activating the link manually');
+		console.log('API Call Successfully Finished!')
+		setIsInDB(false)
 	}
 
 	return (
@@ -152,8 +194,12 @@ export default function Home() {
 			{activeLink.length >= 1 ? <button onClick={deleteLink}>Delete Link</button> : <button onClick={openBelvoWidget}>Open Widget</button>}
 			{userLink && <button onClick={registerLinkFail}>Register Link (Fail)</button>}
 			{userLink && errorMessage && errorMessage.length >= 1 && (<button onClick={() => registerLinkSuccess(userInstitution)}>Reset Link Register Request (No MFA)</button>)}
-			{errorMessage.length >= 1 && <button onClick={() => FailMFA()}>Solve MFA (Fail)</button>}
-			{errorMessage.length >= 1 && <button onClick={() => SolveMFA(userInstitution)}>Solve MFA (Success)</button>}
+			{hasMFA && (
+				<>
+					{errorMessage.length >= 1 && <button onClick={() => FailMFA()}>Solve MFA (Fail)</button>}
+					{errorMessage.length >= 1 && <button onClick={() => SolveMFA(userInstitution)}>Solve MFA (Success)</button>}
+				</>
+			)}
 			{apicallResponse.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, apicallResponse)}>Click to get a console.log() of the shown Data</button> : null}
 			{apicallResponse.length >= 1 && (
 				apicallResponse.map((api, index) => (
@@ -174,7 +220,10 @@ export default function Home() {
 					<Link href='/balances'><button>"Balances" Endpoint Page</button></Link>
 				</div>
 			)}
-
+			{isinDB && <div>
+				<p>Or try to fetch an existing link from the DB</p>
+				<button onClick={fetchLink}>Try to fetch Link on Database</button>
+			</div>}
 			{
 				errorMessage.length >= 1 && (<ErrorHandler errorMessage={errorMessage} />)
 			}

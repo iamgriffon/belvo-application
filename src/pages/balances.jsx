@@ -14,16 +14,20 @@ export default function Balances() {
   const [balanceID, setBalanceID] = useState(null);
 
   async function getBalanceList() {
-    console.log('Initiating API call')
+    const data = {
+      link: activeLink,
+      date1: '2020-01-01',
+      date2: '2021-01-01'
+    }
+    console.log('Initiating API call', data)
     await Belvo.get('get_balances_list')
       .then(res => {
-        setErrorMessage([]);
         return res.data
       }).then(data => {
+        setErrorMessage([]);
         setBalanceList(data);
-        const newID = data[0].id
-        setBalanceID(newID);
-        console.log('API Call Successfully Finished')
+        console.log('API Call Successfully Finished', data)
+        if (data.length > 0 && data[0].id) setBalanceID(data[0].id);
       });
   }
 
@@ -92,11 +96,30 @@ export default function Balances() {
     }
   }
 
+  async function retrieveBalanceDetail(){
+    const requestData = {
+      link: activeLink,
+      date1: '2020-01-01',
+      date2: '2021-01-01'
+    }
+
+    await Belvo.post('retrieve_balance_info', requestData)
+    .then(res => {
+      return res.data
+    }).then(data => {
+      setErrorMessage([]);
+      setBalanceList(data);
+      console.log('API Call Successfully Finished', data)
+      if (data.length > 0 && data[0].id) setBalanceID(data[0].id);
+    });
+  }
+
   return (
     <>
       <Header pageName={'Balances Endpoint'} />
       {activeLink && <button onClick={retrieveBalanceInfoFail}>Get Balances List (Fail)</button>}
       <button onClick={getBalanceList}>Get Balances List (Success)</button>
+      {balanceID && <button onClick={retrieveBalanceDetail}>Retrieve Balance Detail for the current Link (Success)</button>}
       {balanceID && <button onClick={DeleteBalance}>Delete Balance</button>}
       {balanceID ? (<p>Your current balance ID is {balanceID}</p>) : (<p>You don't have a selected balance ID, please get one from the list by clicking the button</p>)}
       {balanceList.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, balanceList)}>Click to get a console.log() of the shown Data</button> : null}
@@ -104,8 +127,9 @@ export default function Balances() {
         balanceList.map((balance, index) => (
           <div key={index}>
             <h3>Balance no. {index + 1}</h3>
-            {balance.name && <p>Balance Name: <strong>{balance.name}</strong></p>}
+            <p>Account Link: <strong>{balance.account.link}</strong></p>
             <p>Balance ID: <strong>{balance.id}</strong></p>
+            {balance.name && <p>Balance Name: <strong>{balance.name}</strong></p>}
             {balance.link && <p>Balance Link: <strong>{balance.link}</strong></p>}
             <p>Current Balance: <strong>{balance.account.balance.current}</strong></p>
             <p>Available Balance: <strong>{balance.account.balance.available}</strong></p>

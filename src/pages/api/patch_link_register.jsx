@@ -21,6 +21,7 @@ export default function (req, res) {
           console.log('Second API Response', final)
           res.send(final)
         })
+        //The actual patch process happens upon error
         .catch(err => {
           const { session, link } = err.detail[0];
           const token = '000000'

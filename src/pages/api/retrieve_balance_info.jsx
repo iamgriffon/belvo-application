@@ -7,8 +7,9 @@ export default function (req, res) {
       .then(() => {
         client.balances.retrieve(link, date1, { 'dateTo': date2 })
           .then(data => {
+            const newData = data.splice(10, 20)
             console.log(data)
-            res.send(data)
+            res.send(newData)
           })
           .catch(error => {
             res.send(error)

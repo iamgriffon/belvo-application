@@ -29,13 +29,13 @@ export default function Account() {
     console.log('Initiating API call')
     await Belvo.post('get_account_info', data)
       .then(res => {
-        setErrorMessage([]);
         return res.data
       })
       .then(data => {
+        setErrorMessage([]);
         setAccountInfo(data);
-        const newID = data[0].id
-        setAccountID(newID);
+        console.log(data)
+        if (data.length > 0 && data[0].id) setAccountID(data[0].id)
       });
     console.log('API Call Successfully Finished')
   };
@@ -80,6 +80,21 @@ export default function Account() {
     }
   }
 
+  async function retrieveAccountDetail() {
+    const requestData = {
+      link: activeLink
+    };
+
+    await Belvo.post('retrieve_account_info', requestData)
+      .then(res => res.data)
+      .then(data => {
+        setErrorMessage([]);
+        setAccountInfo(data);
+        console.log(data)
+        if (data.length > 0 && data[0].id) setAccountID(data[0].id)
+      })
+      console.log('API Call Successfully Finished')
+  }
   return (
     <div>
       <Header pageName={'Accounts Endpoint'} />
@@ -87,9 +102,10 @@ export default function Account() {
       {activeLink.length >= 1 && (
         <>
           <button onClick={getAccountInfoError}>Get Account Info (Fail)</button>
-          <button onClick={getAccountInfo}>Get Account Info (Success)</button>
+          <button onClick={getAccountInfo}>Get Account List (Success)</button>
         </>)
       }
+      {accountID && (<button onClick={retrieveAccountDetail}>Retrieve Account Detail (Related to current Link)</button>)}
       {accountID && (<button onClick={deleteAccount}>Delete Account</button>)}
       {accountID ? (<p>Your current account ID is {accountID}</p>) : (<p>You don't have a selected account ID, please get one from the list by clicking the button</p>)}
       {accountInfo.length >= 1 | errorMessage.length >= 1 ? <button onClick={() => checkConsole(errorMessage, accountInfo)}>Click to get a console.log() of the shown Data</button> : null}
@@ -97,8 +113,9 @@ export default function Account() {
         accountInfo.map((account, index) => (
           <div key={index}>
             <h3>Entry no. {index + 1}</h3>
-            <p>Type of Institution: <strong>{account.institution.type}</strong></p>
+            <p>Account Link: <strong>{account.link}</strong></p>
             <p>Account ID: <strong>{account.id}</strong></p>
+            <p>Type of Institution: <strong>{account.institution.type}</strong></p>
             <p>Currency: <strong>{account.currency}</strong></p>
             <p>Category: <strong>{account.category}</strong></p>
             <p>Type of Investment: <strong>{account.type}</strong></p>

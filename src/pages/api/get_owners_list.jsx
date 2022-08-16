@@ -3,14 +3,14 @@ import { client } from '../../services/belvoClient'
 export default function (req, res) {
 
   async function listOwners() {
-    client.connect()
+    await client.connect()
       .then(() => {
-        client.owners.list()
-          .then(response => {
-            res.send(response.slice(10,20))
+        client.owners.list({limit: 10})
+          .then(data => {
+            res.send(data);
           })
           .catch(error => {
-            res.send(error);
+            res.status(400).send(error);
           });
       });
   }
