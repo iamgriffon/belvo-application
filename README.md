@@ -21,6 +21,12 @@ After cloning the project, please install dependencies via
   yarn dev
   ```
 
+  Add your sandbox API Keys in your environment:
+  ```bash
+  BELVO_SANDBOX_SECRET_ID='your-secret-id'
+  BELVO_SANDBOX_SECRET_PASSWORD='your-secret-password'
+  ```
+
   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
